@@ -1,4 +1,4 @@
-class Node:
+class Bonus:
 
     parent = None
     weight = None
@@ -10,4 +10,3 @@ class Node:
         self.reach = reach
         self.base_weight = base_weight
         self.value = value
-

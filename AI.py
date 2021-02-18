@@ -1,9 +1,9 @@
 from enum import Enum
 
 
-class Algorithm(Enum):
+class IA(Enum):
 
-    DFS = 0
-    DIJKSTRA = 1
+    PATH = 0
+    PERSO = 1
     PLAYER = 2
     NONE = 3

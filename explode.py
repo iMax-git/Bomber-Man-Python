@@ -1,10 +1,10 @@
-class Explosion:
+class Explode:
 
     bomber = None
 
     def __init__(self, x, y, r):
-        self.sourceX = x
-        self.sourceY = y
+        self.x = x
+        self.y = y
         self.range = r
         self.time = 300
         self.frame = 0
@@ -21,9 +21,9 @@ class Explosion:
 
         for s in self.sectors:
             for x in bombs:
-                if x.posX == s[0] and x.posY == s[1]:
+                if x.x == s[0] and x.y == s[1]:
 
-                    map[x.posX][x.posY] = 0
+                    map[x.x][x.y] = 0
                     x.bomber.bomb_limit += 1
                     self.explode(map, bombs, x)
 
@@ -32,9 +32,9 @@ class Explosion:
         for i in self.sectors:
             map[i[0]][i[1]] = 0
 
-    def update(self, dt):
+    def update(self, timer):
 
-        self.time = self.time - dt
+        self.time = self.time - timer
 
         if self.time < 100:
             self.frame = 2
