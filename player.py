@@ -38,7 +38,7 @@ class Player:
             elif not pax.life:
                 continue
             else:
-                map[int(x.posX/4)][int(x.posY/4)] = 2
+                map[int(pax.x/4)][int(pax.y/4)] = 2
 
         if self.x % 4 != 0 and dx == 0:
             if self.x % 4 == 1:

@@ -2,10 +2,10 @@ import pygame
 import sys
 import random
 import time
-from player import Player
-from enemi import Ennemi
-from AI import IA
-from explode import Explode
+from main.player import Player
+from main.enemi import Ennemi
+from main.AI import IA
+from main.explode import Explode
 
 Keys = {"UP":273,"DOWN":274,"RIGHT":276,"LEFT":274, "A":113, "B":98, "C":99, "D":100, "E":101, "F":102,
          "G":103, "H":104, "I":105, "J":106, "K":107, "M":59, "N":110, "O":111, "P":112, "Q":97, "R":114,
@@ -143,27 +143,27 @@ def main():
         for bot in other_list:
             bot.make_move(map, bombs, explode, blocks)
         keys = pygame.key.get_pressed()
-        temp = player.direction
+        temp = player.head
         movement = False
-        if keys[Keys["DOWN"]]:
+        if keys[pygame.K_DOWN]:
             temp = 0
             player.move(0, 1, map, blocks)
             movement = True
-        elif keys[Keys["RIGHT"]]:
+        elif keys[pygame.K_RIGHT]:
             temp = 1
             player.move(1, 0, map, blocks)
             movement = True
-        elif keys[Keys["UP"]]:
+        elif keys[pygame.K_UP]:
             temp = 2
             player.move(0, -1, map, blocks)
             movement = True
-        elif keys[Keys["LEFT"]]:
+        elif keys[pygame.K_LEFT]:
             temp = 3
             player.move(-1, 0, map, blocks)
             movement = True
-        if temp != player.direction:
+        if temp != player.head:
             player.frame = 0
-            player.direction = temp
+            player.head = temp
         if movement:
             if player.frame == 2:
                 player.frame = 0
@@ -178,7 +178,7 @@ def main():
                 if e.key == pygame.K_SPACE:
                     if player.bomb_limit == 0:
                         continue
-                    temp_bomb = player.plant_bomb(map)
+                    temp_bomb = player.plantbomb(map)
                     bombs.append(temp_bomb)
                     map[temp_bomb.x][temp_bomb.y] = 3
                     player.bomb_limit -= 1
@@ -213,14 +213,14 @@ def DrawAll():
         for x in y.sectors:
             screen.blit(explosion_images[y.frame], (x[0] * width, x[1] * height, height, width))
     if player.life:
-        screen.blit(player.animation[player.direction][player.frame],
+        screen.blit(player.animation[player.head][player.frame],
                (player.x * (width / 4), player.y * (height / 4), width, height))
     for bot in other_list:
         if bot.life:
-            screen.blit(bot.animation[bot.direction][bot.frame],
+            screen.blit(bot.animation[bot.head][bot.frame],
                    (bot.x * (width / 4), bot.y * (height / 4), width, height))
             if show_path:
-                if bot.algorithm == IA.PATH:
+                if bot.ia == IA.PATH:
                     for bb in bot.path:
                         pygame.draw.rect(screen, (255, 0, 0, 240), [bb[0] * width, bb[1] * height, width, width], 1)
                 else:
@@ -232,17 +232,17 @@ def DrawAll():
 def update_bombs(timer):
     for bomb in bombs:
         bomb.update(timer)
-        if bomb.time < 1:
+        if bomb.timer < 1:
             bomb.bomber.bomb_limit += 1
             map[bomb.x][bomb.y] = 0
-            exp = Explode(bomb.posX, bomb.posY, bomb.range)
+            exp = Explode(bomb.x, bomb.y, bomb.range)
             exp.explode(map, bombs, bomb)
             exp.clear_sectors(map)
             explode.append(exp)
     if player not in other_list:
-        player.check_death(explode)
+        player.dead(explode)
     for bot in other_list:
-        bot.check_death(explode)
+        bot.dead(explode)
     for e in explode:
         e.update(timer)
         if e.time < 1:
@@ -261,7 +261,7 @@ def endgame():
             bot.make_move(map, bombs, explode, blocks)
             if bot.life:
                 count += 1
-                winner = bot.algorithm.name
+                winner = bot.ia.name
         if count == 1:
             DrawAll()
             textsurface = font.render(winner + " wins", False, (0, 0, 0))

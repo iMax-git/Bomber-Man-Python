@@ -13,6 +13,7 @@ class Bomb:
         self.bomber = bomber
         self.sectors = []
         self.get_range(map)
+        self.frame = 1
         
     def update(self, dt):
 
@@ -26,7 +27,7 @@ class Bomb:
 
     def get_range(self, map):
 
-        self.sectors.append([self.pos, self.y])
+        self.sectors.append([self.x, self.y])
 
         for xp in range(1, self.range):
             if map[self.x + xp][self.y] == 1:

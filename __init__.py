@@ -1,25 +1,12 @@
 import pygame
 import pygame_menu
 
-import initGame
-from AI import IA
+from main.initGame import *
+from main.AI import IA
 
 Keys = {"UP":273,"DOWN":274,"RIGHT":276,"LEFT":274, "A":113, "B":98, "C":99, "D":100, "E":101, "F":102,
          "G":103, "H":104, "I":105, "J":106, "K":107, "M":59, "N":110, "O":111, "P":112, "Q":97, "R":114,
           "S":115, "T":116, "U":117, "V":118, "W":122, "X":120, "Y":121, "Z":119, "ESC":27}
-
-width = 500
-height = 1280
-pygame.init()
-
-
-pygame.display.set_caption("Pyreet-Fighter")
-screen = pygame.display.set_mode(size=(height, width))
-
-
-while True:
-    pass
-
 
 
 
@@ -70,7 +57,7 @@ def change_enemy3(value, c):
 
 
 def run_game():
-    initGame.initGame(show_path, player_ia, ennemi1_ia, ennemi2_ia, ennemi3_ia, size)
+    initGame(show_path, player_ia, ennemi1_ia, ennemi2_ia, ennemi3_ia, size)
 
 
 def main_background():
@@ -81,7 +68,7 @@ def main_background():
 def menu_loop():
     pygame.init()
 
-    pygame.display.set_caption('Bomberman')
+    pygame.display.set_caption('Bomber-Man-Python')
     clock = pygame.time.Clock()
 
     menu_theme = pygame_menu.themes.Theme(
@@ -110,14 +97,10 @@ def menu_loop():
         width=int(wsize[0] * 0.7),
         title='Options'
     )
-    play_options.add_selector("Character 1", [("Player", IA.PLAYER), ("DFS", IA.DFS),
-                                              ("DIJKSTRA", IA.DIJKSTRA), ("None", IA.NONE)], onchange=change_player)
-    play_options.add_selector("Character 2", [("DIJKSTRA", IA.DIJKSTRA), ("DFS", IA.DFS),
-                                              ("None", IA.NONE)], onchange=change_enemy1)
-    play_options.add_selector("Character 3", [("DIJKSTRA", IA.DIJKSTRA), ("DFS", IA.DFS),
-                                              ("None", IA.NONE)], onchange=change_enemy2,  default=1)
-    play_options.add_selector("Character 4", [("DIJKSTRA", IA.DIJKSTRA), ("DFS", IA.DFS),
-                                              ("None", IA.NONE)], onchange=change_enemy3)
+    play_options.add_selector("Character 1", [("Player", IA.PLAYER), ("Bot", IA.PERSO), ("None", IA.NONE)], onchange=change_player)
+    play_options.add_selector("Character 2", [("Bot", IA.PERSO), ("None", IA.NONE)], onchange=change_enemy1)
+    play_options.add_selector("Character 3", [("Bot", IA.PERSO), ("None", IA.NONE)], onchange=change_enemy2,  default=1)
+    play_options.add_selector("Character 4", [("Bot", IA.PERSO), ("None", IA.NONE)], onchange=change_enemy3)
     play_options.add_selector("Show path", [("Yes", True), ("No", False)], onchange=change_path)
 
     play_options.add_button('Back', pygame_menu.events.BACK)

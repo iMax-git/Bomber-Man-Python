@@ -5,9 +5,9 @@ Created on 17 fvr. 2021
 '''
 import pygame
 import random
-from bomb import Bomb
-from bonus import Bonus
-from AI import IA
+from main.bomb import Bomb
+from main.bonus import Bonus
+from main.AI import IA
 
 class Ennemi:
     
@@ -17,7 +17,7 @@ class Ennemi:
         self.movement_path = []
         self.x = x * 4
         self.y = y * 4
-        self.direction = 0
+        self.head = 0
         self.frame = 0
         self.animation = []
         self.range = 3
@@ -27,13 +27,13 @@ class Ennemi:
         self.dire = []
         
     def live(self, map, bomb, exp, ennemi):
-        if self.direction == 0:
+        if self.head == 0:
             self.y += 1
-        elif self.direction == 1:
+        elif self.head == 1:
             self.x += 1
-        elif self.direction == 2:
+        elif self.head == 2:
             self.y -= 1
-        elif self.direction == 3:
+        elif self.head == 3:
             self.x -= 1
             
         if self.x % 4 == 0 and self.y % 4 == 0:
@@ -54,13 +54,13 @@ class Ennemi:
                 bombs.append(self.plant_bomb(map))
                 self.plant = False
                 map[int(self.x / 4)][int(self.y / 4)] = 3
-            if self.ia is IA.path:
+            if self.ia is IA.PATH:
                 self.paths(self.create_grid(map, bombs, explosions, enemy))
             else:
                 self.perso(self.create_grid_perso(map, bombs, explosions, enemy))
 
         else:
-            self.direction = self.movement_path[0]
+            self.head = self.movement_path[0]
             self.live(map, bombs, explosions, enemy)
 
     def plant_bomb(self, map):
@@ -68,10 +68,10 @@ class Ennemi:
         self.bomb_limit -= 1
         return b
 
-    def check_death(self, explode):
+    def dead(self, explode):
 
         for exp in explode:
-            for area in exp.zone:
+            for area in exp.sectors:
                 if int(self.x / 4) == area[0] and int(self.y / 4) == area[1]:
                     if exp.bomber == self:
                         print(str(self.ia.value) + " SUICIDE")
@@ -191,13 +191,13 @@ class Ennemi:
                                     + grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]].base_weight:
                                 grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]].parent = current
                                 grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]].weight = current.weight + grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]].base_weight
-                                grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]].direction = self.dire[i][2]
+                                grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]].head = self.dire[i][2]
 
                         else:
                             grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]].parent = current
                             grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]].weight =\
                                 current.weight + grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]].base_weight
-                            grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]].direction = self.dire[i][2]
+                            grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]].head = self.dire[i][2]
                             open_list.append(grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]])
 
             if len(open_list) == 0:
