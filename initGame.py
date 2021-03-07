@@ -1,11 +1,18 @@
 import pygame
-import sys
+import sys # Pour le Fin de tache
 import random
 import time
-from main.player import Player
-from main.enemi import Ennemi
-from main.AI import IA
-from main.explode import Explode
+try:
+    from player import *
+    from enemi import *
+    from AI import *
+    from explode import *
+except ImportError: 
+    from main.player import *
+    from main.enemi import *
+    from main.AI import *
+    from main.explode import *
+
 
 Keys = {"UP":273,"DOWN":274,"RIGHT":276,"LEFT":274, "A":113, "B":98, "C":99, "D":100, "E":101, "F":102,
          "G":103, "H":104, "I":105, "J":106, "K":107, "M":59, "N":110, "O":111, "P":112, "Q":97, "R":114,
@@ -264,7 +271,9 @@ def endgame():
                 winner = bot.ia.name
         if count == 1:
             DrawAll()
-            textsurface = font.render(winner + " wins", False, (0, 0, 0))
+            if winner == "PERSO":
+                winner == "IA"
+            textsurface = font.render(winner + " à gagner", False, (0, 0, 0))
             font_w = textsurface.get_width()
             font_h = textsurface.get_height()
             screen.blit(textsurface, (screen.get_width() // 2 - font_w//2,  screen.get_height() // 2 - font_h//2))
@@ -273,7 +282,7 @@ def endgame():
             break
         if count == 0:
             DrawAll()
-            textsurface = font.render("Draw", False, (0, 0, 0))
+            textsurface = font.render("égalité", False, (0, 0, 0))
             font_w = textsurface.get_width()
             font_h = textsurface.get_height()
             screen.blit(textsurface, (screen.get_width() // 2 - font_w//2, screen.get_height() // 2 - font_h//2))

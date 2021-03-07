@@ -5,9 +5,14 @@ Created on 17 fvr. 2021
 '''
 import pygame
 import random
-from main.bomb import Bomb
-from main.bonus import Bonus
-from main.AI import IA
+try:
+    from bomb import *
+    from bonus import *
+    from AI import *
+except ImportError: 
+    from main.bomb import *
+    from main.bonus import *
+    from main.AI import *
 
 class Ennemi:
     
@@ -24,7 +29,7 @@ class Ennemi:
         self.bomb_limit = 1
         self.plant = False
         self.ia = ia
-        self.dire = []
+        self.dire = [[1, 0, 1], [0, 1, 0], [-1, 0, 3], [0, -1, 2]]
         
     def live(self, map, bomb, exp, ennemi):
         if self.head == 0:
@@ -51,10 +56,11 @@ class Ennemi:
             return
         if len(self.movement_path) == 0:
             if self.plant:
+
                 bombs.append(self.plant_bomb(map))
                 self.plant = False
                 map[int(self.x / 4)][int(self.y / 4)] = 3
-            if self.ia is IA.PATH:
+            if self.ia is IA.PERSO:
                 self.paths(self.create_grid(map, bombs, explosions, enemy))
             else:
                 self.perso(self.create_grid_perso(map, bombs, explosions, enemy))
@@ -74,12 +80,10 @@ class Ennemi:
             for area in exp.sectors:
                 if int(self.x / 4) == area[0] and int(self.y / 4) == area[1]:
                     if exp.bomber == self:
-                        print(str(self.ia.value) + " SUICIDE")
-                    self.life = False
+                        self.life = False
                     return
 
     def paths(self, grid):
-
         new_path = [[int(self.x / 4), int(self.y / 4)]]
         depth = 0
         if self.bomb_limit == 0:
@@ -90,16 +94,13 @@ class Ennemi:
         self.path = new_path
 
     def paths_rec(self, grid, end, path, depth):
-
         last = path[-1]
         if depth > 200:
             return
         if grid[last[0]][last[1]] == 0 and end == 0:
             return
         elif end == 2:
-            if grid[last[0] + 1][last[1]] == end or grid[last[0] - 1][last[1]] == end \
-                    or grid[last[0]][last[1] + 1] == end \
-                    or grid[last[0]][last[1] - 1] == end:
+            if grid[last[0] + 1][last[1]] == end or grid[last[0] - 1][last[1]] == end or grid[last[0]][last[1] + 1] == end or grid[last[0]][last[1] - 1] == end:
                 if len(path) == 1 and end == 2:
                     self.plant = True
                 return

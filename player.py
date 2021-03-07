@@ -7,8 +7,10 @@ Created on 17 fevr. 2021
 import pygame
 import math
 
-from main.bomb import Bomb
-
+try:
+    from bomb import *
+except ImportError:
+    from main.bomb import *
 class Player:
     def __init__(self):
         self.life = True
@@ -78,9 +80,10 @@ class Player:
         return bomb
     
     def dead(self,exp):
+        
         for explode in exp:
             for sector in explode.sectors:
-                if int(self.y/4) == sector[0] and int(self.y/4) == sector[1]:
+                if int(self.x/4) == sector[0] and int(self.y/4) == sector[1]:
                     self.life = False
         pass
         
