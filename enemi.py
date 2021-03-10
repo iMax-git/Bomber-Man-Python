@@ -8,11 +8,11 @@ import random
 try:
     from bomb import *
     from bonus import *
-    from AI import *
+    from SELECT import *
 except ImportError: 
     from main.bomb import *
     from main.bonus import *
-    from main.AI import *
+    from main.SELECT import *
 
 class Ennemi:
     
@@ -60,7 +60,7 @@ class Ennemi:
                 bombs.append(self.plant_bomb(map))
                 self.plant = False
                 map[int(self.x / 4)][int(self.y / 4)] = 3
-            if self.ia is IA.PERSO:
+            if self.ia is SELECT.BOT:
                 self.paths(self.create_grid(map, bombs, explosions, enemy))
             else:
                 self.perso(self.create_grid_perso(map, bombs, explosions, enemy))
@@ -79,17 +79,17 @@ class Ennemi:
         for exp in explode:
             for area in exp.sectors:
                 if int(self.x / 4) == area[0] and int(self.y / 4) == area[1]:
+                    print("hit")
                     if exp.bomber == self:
                         self.life = False
                     return
 
     def paths(self, grid):
         new_path = [[int(self.x / 4), int(self.y / 4)]]
-        depth = 0
         if self.bomb_limit == 0:
-            self.paths_rec(grid, 0, new_path, depth)
+            self.paths_rec(grid, 0, new_path, 0)
         else:
-            self.paths_rec(grid, 2, new_path, depth)
+            self.paths_rec(grid, 2, new_path, 0)
 
         self.path = new_path
 
@@ -108,8 +108,6 @@ class Ennemi:
         grid[last[0]][last[1]] = 9
 
         random.shuffle(self.dire)
-
-        # safe
         if grid[last[0] + self.dire[0][0]][last[1] + self.dire[0][1]] == 0:
             path.append([last[0] + self.dire[0][0], last[1] + self.dire[0][1]])
             self.movement_path.append(self.dire[0][2])
@@ -122,8 +120,6 @@ class Ennemi:
         elif grid[last[0] + self.dire[3][0]][last[1] + self.dire[3][1]] == 0:
             path.append([last[0] + self.dire[3][0], last[1] + self.dire[3][1]])
             self.movement_path.append(self.dire[3][2])
-
-        # unsafe
         elif grid[last[0] + self.dire[0][0]][last[1] + self.dire[0][1]] == 1:
             path.append([last[0] + self.dire[0][0], last[1] + self.dire[0][1]])
             self.movement_path.append(self.dire[0][2])
@@ -151,21 +147,19 @@ class Ennemi:
 
         visited = []
         open_list = []
-        current = grid[int(self.x / 4)][int(self.y / 4)]
-        current.weight = current.base_weight
+        map = grid[int(self.x / 4)][int(self.y / 4)]
+        map.weight = map.base_weight
         new_path = []
         while True:
-            visited.append(current)
+            visited.append(map)
             random.shuffle(self.dire)
-            if (current.value == end and end == 0) or\
-                    (end == 1 and (grid[current.x+1][current.y].value == 1 or grid[current.x-1][current.y].value == 1 or
-                grid[current.x][current.y+1].value == 1 or grid[current.x][current.y-1].value == 1)):
-                new_path.append([current.x, current.y])
+            if (map.value == end and end == 0) or (end == 1 and (grid[map.x+1][map.y].value == 1 or grid[map.x-1][map.y].value == 1 or grid[map.x][map.y+1].value == 1 or grid[map.x][map.y-1].value == 1)):
+                new_path.append([map.x, map.y])
                 while True:
-                    if current.parent is None:
+                    if map.parent is None:
                         break
-                    current = current.parent
-                    new_path.append([current.x, current.y])
+                    map = map.parent
+                    new_path.append([map.x, map.y])
                 new_path.reverse()
                 for xd in range(len(new_path)):
                     if new_path[xd] is not new_path[-1]:
@@ -183,43 +177,34 @@ class Ennemi:
                 return
 
             for i in range(len(self.dire)):
-                if current.x + self.dire[i][0] < len(grid) and current.y + self.dire[i][1] < len(grid):
-                    if grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]].reach \
-                            and grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]] not in visited:
-                        if grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]] in open_list:
-                            if grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]].weight >\
-                                    grid[current.x][current.y].weight \
-                                    + grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]].base_weight:
-                                grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]].parent = current
-                                grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]].weight = current.weight + grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]].base_weight
-                                grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]].head = self.dire[i][2]
+                if map.x + self.dire[i][0] < len(grid) and map.y + self.dire[i][1] < len(grid):
+                    if grid[map.x + self.dire[i][0]][map.y + self.dire[i][1]].reach and grid[map.x + self.dire[i][0]][map.y + self.dire[i][1]] not in visited:
+                        if grid[map.x + self.dire[i][0]][map.y + self.dire[i][1]] in open_list:
+                            if grid[map.x + self.dire[i][0]][map.y + self.dire[i][1]].weight > grid[map.x][map.y].weight + grid[map.x + self.dire[i][0]][map.y + self.dire[i][1]].base_weight:
+                                grid[map.x + self.dire[i][0]][map.y + self.dire[i][1]].parent = map
+                                grid[map.x + self.dire[i][0]][map.y + self.dire[i][1]].weight = map.weight + grid[map.x + self.dire[i][0]][map.y + self.dire[i][1]].base_weight
+                                grid[map.x + self.dire[i][0]][map.y + self.dire[i][1]].head = self.dire[i][2]
 
                         else:
-                            grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]].parent = current
-                            grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]].weight =\
-                                current.weight + grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]].base_weight
-                            grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]].head = self.dire[i][2]
-                            open_list.append(grid[current.x + self.dire[i][0]][current.y + self.dire[i][1]])
+                            grid[map.x + self.dire[i][0]][map.y + self.dire[i][1]].parent = map
+                            grid[map.x + self.dire[i][0]][map.y + self.dire[i][1]].weight = map.weight + grid[map.x + self.dire[i][0]][map.y + self.dire[i][1]].base_weight
+                            grid[map.x + self.dire[i][0]][map.y + self.dire[i][1]].head = self.dire[i][2]
+                            open_list.append(grid[map.x + self.dire[i][0]][map.y + self.dire[i][1]])
 
             if len(open_list) == 0:
                 self.path = [[int(self.x / 4), int(self.y / 4)]]
                 return
 
-            next_node = open_list[0]
+            next = open_list[0]
             for n in open_list:
-                if n.weight < next_node.weight:
-                    next_node = n
-            open_list.remove(next_node)
-            current = next_node
+                if n.weight < next.weight:
+                    next = n
+            open_list.remove(next)
+            map = next
 
 
-    def create_grid(self, map, bombs, explosions, enemys):
-        grid = [[0] * len(map) for r in range(len(map))]
-
-        # 0 - safe
-        # 1 - unsafe
-        # 2 - destryable
-        # 3 - unreachable
+    def create_grid(self, map, bombs, explosions, bot):
+        grid = [[0] * len(map) for i in range(len(map))]
 
         for b in bombs:
             b.get_range(map)
@@ -238,23 +223,19 @@ class Ennemi:
                 elif map[i][j] == 2:
                     grid[i][j] = 2
 
-        for x in enemys:
-            if x == self:
+        for BotInfo in bot:
+            if BotInfo == self:
                 continue
-            elif not x.life:
+            elif not BotInfo.life:
                 continue
             else:
-                grid[int(x.x / 4)][int(x.y / 4)] = 2
+                grid[int(BotInfo.x / 4)][int(BotInfo.y / 4)] = 2
 
         return grid
 
-    def create_grid_perso(self, map, bombs, explosions, enemys):
+    def create_grid_perso(self, map, bombs, explosions, bot):
         grid = [[None] * len(map) for r in range(len(map))]
 
-        # 0 - safe
-        # 1 - destroyable
-        # 2 - unreachable
-        # 3 - unsafe
         for i in range(len(map)):
             for j in range(len(map)):
                 if map[i][j] == 0:
@@ -277,14 +258,14 @@ class Ennemi:
             for s in e.sectors:
                 grid[s[0]][s[1]].reach = False
 
-        for x in enemys:
-            if x == self:
+        for BotInfo in bot:
+            if BotInfo == self:
                 continue
-            elif not x.life:
+            elif not BotInfo.life:
                 continue
             else:
-                grid[int(x.x / 4)][int(x.y / 4)].reach = False
-                grid[int(x.x / 4)][int(x.y / 4)].value = 1
+                grid[int(BotInfo.x / 4)][int(BotInfo.y / 4)].reach = False
+                grid[int(BotInfo.x / 4)][int(BotInfo.y / 4)].value = 1
         return grid
 
     def load_animations(self, en, scale):

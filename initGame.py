@@ -5,12 +5,12 @@ import time
 try:
     from player import *
     from enemi import *
-    from AI import *
+    from SELECT import *
     from explode import *
 except ImportError: 
     from main.player import *
     from main.enemi import *
-    from main.AI import *
+    from main.SELECT import *
     from main.explode import *
 
 
@@ -39,7 +39,8 @@ blocks = []
 bombs = []
 explode = []
 
-map = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+map = [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
         [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -51,7 +52,8 @@ map = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
         [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    ]
 
 grass_img = None
 block_img = None
@@ -88,28 +90,28 @@ def initGame(path,player_ia,ennemi1_ia,ennemi2_ia,ennemi3_ia, scale):
     explode.clear()
     player = Player()
 
-    if ennemi1_ia is not IA.NONE:
+    if ennemi1_ia is not SELECT.NONE:
         ennemi1 = Ennemi(11, 11, ennemi1_ia)
         ennemi1.load_animations('1', scale)
         other_list.append(ennemi1)
         blocks.append(ennemi1)
 
-    if ennemi2_ia is not IA.NONE:
+    if ennemi2_ia is not SELECT.NONE:
         ennemi2 = Ennemi(1, 11, ennemi2_ia)
         ennemi2.load_animations('2', scale)
         other_list.append(ennemi2)
         blocks.append(ennemi2)
 
-    if ennemi3_ia is not IA.NONE:
+    if ennemi3_ia is not SELECT.NONE:
         ennemi3 = Ennemi(11, 1, ennemi3_ia)
         ennemi3.load_animations('3', scale)
         other_list.append(ennemi3)
         blocks.append(ennemi3)
 
-    if player_ia is IA.PLAYER:
+    if player_ia is SELECT.PLAYER:
         player.load_animations(scale)
         blocks.append(player)
-    elif player_ia is not IA.NONE:
+    elif player_ia is not SELECT.NONE:
         en0 = Ennemi(1, 1, player_ia)
         en0.load_animations('', scale)
         other_list.append(en0)
@@ -226,13 +228,14 @@ def DrawAll():
         if bot.life:
             screen.blit(bot.animation[bot.head][bot.frame],
                    (bot.x * (width / 4), bot.y * (height / 4), width, height))
+            #pour le dev (affiche les carre)
             if show_path:
-                if bot.ia == IA.PATH:
-                    for bb in bot.path:
-                        pygame.draw.rect(screen, (255, 0, 0, 240), [bb[0] * width, bb[1] * height, width, width], 1)
+                if bot.ia == SELECT.PATH:
+                    for path in bot.path:
+                        pygame.draw.rect(screen, (255, 0, 0, 240), [path[0] * width, path[1] * height, width, width], 1)
                 else:
-                    for bb in bot.path:
-                        pygame.draw.rect(screen, (255, 0, 255, 240), [bb[0] * width, bb[1] * height, width, width], 1)
+                    for path in bot.path:
+                        pygame.draw.rect(screen, (255, 0, 255, 240), [path[0] * width, path[1] * height, width, width], 1)
 
     pygame.display.update()
 
@@ -263,17 +266,22 @@ def endgame():
         timer = clock.tick(15)
         update_bombs(timer)
         count = 0
-        winner = ""
+        winner = 0
         for bot in other_list:
             bot.make_move(map, bombs, explode, blocks)
             if bot.life:
                 count += 1
-                winner = bot.ia.name
+                winner = bot.ia
+            print(bot)
         if count == 1:
             DrawAll()
-            if winner == "PERSO":
-                winner == "IA"
-            textsurface = font.render(winner + " à gagner", False, (0, 0, 0))
+            
+            if winner == 1:
+                textsurface = font.render("Les bots ont gagner", False, (255, 255, 255))
+            elif winner == 0:
+                textsurface = font.render("Les joueurs ont gagner", False, (255, 255, 255))  
+            
+            
             font_w = textsurface.get_width()
             font_h = textsurface.get_height()
             screen.blit(textsurface, (screen.get_width() // 2 - font_w//2,  screen.get_height() // 2 - font_h//2))
@@ -282,7 +290,7 @@ def endgame():
             break
         if count == 0:
             DrawAll()
-            textsurface = font.render("égalité", False, (0, 0, 0))
+            textsurface = font.render("egalite", False, (0, 0, 0))
             font_w = textsurface.get_width()
             font_h = textsurface.get_height()
             screen.blit(textsurface, (screen.get_width() // 2 - font_w//2, screen.get_height() // 2 - font_h//2))
