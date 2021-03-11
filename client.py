@@ -27,7 +27,7 @@ test = Test(5,5,3)
 x,y = (test.x,test.y)
 print(test.calc(x, y))
 print(x,y)
-msg = [5,2,["test"]]
+msg = ["iMax"]
 print(msg)
 #msg = msg.encode("utf8")
 #print(msg)

@@ -1,12 +1,18 @@
 import pygame
 import pygame_menu
 import socket
+import threading
+import json
 try:
-    from initGame import *
-    from SELECT import *
+    from initGame import initGame
+    from initGameMP import initGameMP
+    from SELECT import SELECT
+    from network import Network
 except ImportError: 
     from main.initGame import *
+    from main.initGameMP import initGameMP
     from main.SELECT import *
+    from main.network import Network
 
 
 
@@ -15,6 +21,8 @@ pyinfo = pygame.display.Info()
 size = int(pyinfo.current_h * 0.035)
 wsize = (13 * size, 13 * size)
 
+
+PlayerLists = ["None","None","None"]
 player_ia = SELECT.PLAYER
 ennemi1_ia = SELECT.BOT
 ennemi2_ia = SELECT.NONE
@@ -23,16 +31,26 @@ show_path = False
 surface = pygame.display.set_mode(wsize)
 
 
-host, port = ('',5566)
+host,port = ('192.168.1.26',5566)
 #https://www.youtube.com/watch?v=5FqzL9LJkXA
-socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-try:
-    socket.connect((host, port))
-    print("client connecter")
-except :
-    print("Connection Failed")
-finally:
-    socket.close()
+
+
+class ThreadForClient(threading.Thread):
+    def __init__(self,conn):
+        threading.Thread.__init__(self)
+        self.conn= conn
+        connected = 0
+        
+    def run(self):
+        data = self.conn.recv(1024).decode()
+        
+        print(data)
+
+
+
+
+
+
 
 def show_path(value, c):
     global show_path
@@ -58,16 +76,20 @@ def select4(value, c):
     global ennemi3_ia
     ennemi3_ia = c
 
+ 
 
 def start():
     initGame(show_path, player_ia, ennemi1_ia, ennemi2_ia, ennemi3_ia, size)
+    print("exec to ?")
 
-def startmultiplayer():
+def startmultiplayer():    
+    initGameMP(show_path, SELECT.PLAYER,SELECT.PLAYER,SELECT.PLAYER,SELECT.PLAYER, size)
     pass
 
 def main_background():
     global surface
     surface.fill((0, 0, 0))
+
 
 
 def menu_loop():
@@ -108,11 +130,11 @@ def menu_loop():
     
     play_multiplayer.add_label("Connection:",max_char=-1, font_size=20)
     play_multiplayer.add_label("Player 1 -> "+"You",max_char=-1, font_size=20)
-    play_multiplayer.add_label("Player 2 -> "+"None", max_char=-1, font_size=20)
-    play_multiplayer.add_label("Player 3 -> "+"None", max_char=-1, font_size=20)
-    play_multiplayer.add_label("Player 4 -> "+"None", max_char=-1, font_size=20)
+    play_multiplayer.add_label("Player 2 -> "+PlayerLists[0], max_char=-1, font_size=20)
+    play_multiplayer.add_label("Player 3 -> "+PlayerLists[1], max_char=-1, font_size=20)
+    play_multiplayer.add_label("Player 4 -> "+PlayerLists[2], max_char=-1, font_size=20)
     
-    play_multiplayer.add_button('Lancer', startmultiplayer())
+    play_multiplayer.add_button('Lancer', startmultiplayer)
     play_multiplayer.add_button('Arriere', pygame_menu.events.BACK)
 
 
@@ -124,6 +146,7 @@ def menu_loop():
     
     while True:
 
+        
 
         main_background()
 
@@ -137,6 +160,5 @@ def menu_loop():
         play_menu.draw(surface)
 
         pygame.display.flip()
-
 
 menu_loop()

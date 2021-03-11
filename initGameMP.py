@@ -3,9 +3,9 @@ import sys # Pour le Fin de tache
 import random
 import time
 try:
-    from player import *
+    from player import Player
     from enemi import *
-    from SELECT import *
+    from SELECT import SELECT
     from explode import *
 except ImportError: 
     from main.player import *
@@ -75,7 +75,7 @@ font = pygame.font.SysFont('Bebas', 30)
 string_lose = font.render('GAME OVER', False, (0, 0, 0))
 string_win = font.render('WIN', False, (0, 0, 0))
 
-def initGame(path,player_ia,ennemi1_ia,ennemi2_ia,ennemi3_ia, scale):
+def initGameMP(path,player_1, player_2, player_3, player_4, scale):
     global height,width,screen,font,clock,other_list,blocks,player,explode,bombs,grass_img,block_img,box_img,bomb1_img,bomb2_img,bomb3_img,explosion1_img,explosion2_img,explosion3_img,terrain_images,bomb_images,explosion_images
     height = scale
     width = scale
@@ -88,37 +88,34 @@ def initGame(path,player_ia,ennemi1_ia,ennemi2_ia,ennemi3_ia, scale):
     blocks = []
     bombs.clear()
     explode.clear()
-    player = Player()
 
-    if ennemi1_ia is not SELECT.NONE:
-        ennemi1 = Ennemi(11, 11, ennemi1_ia)
-        ennemi1.load_animations('1', scale)
-        other_list.append(ennemi1)
-        blocks.append(ennemi1)
-
-    if ennemi2_ia is not SELECT.NONE:
-        ennemi2 = Ennemi(1, 11, ennemi2_ia)
-        ennemi2.load_animations('2', scale)
-        other_list.append(ennemi2)
-        blocks.append(ennemi2)
-
-    if ennemi3_ia is not SELECT.NONE:
-        ennemi3 = Ennemi(11, 1, ennemi3_ia)
-        ennemi3.load_animations('3', scale)
-        other_list.append(ennemi3)
-        blocks.append(ennemi3)
-
-    if player_ia is SELECT.PLAYER:
-        player.load_animations(scale)
-        blocks.append(player)
-    elif player_ia is not SELECT.NONE:
-        en0 = Ennemi(1, 1, player_ia)
-        en0.load_animations('', scale)
-        other_list.append(en0)
-        blocks.append(en0)
-        player.life = False
+    if player_2 is SELECT.PLAYER:
+        player2 = Player()
+        player2.load_animations(scale)
+        blocks.append(player2)
     else:
-        player.life = False
+        player2.life = False
+
+    if player_3 is SELECT.PLAYER:
+        player3 = Player()
+        player3.load_animations(scale)
+        blocks.append(player3)
+    else:
+        player3.life = False
+
+    if player_4 is SELECT.PLAYER:
+        player4 = Player()
+        player4.load_animations(scale)
+        blocks.append(player4)
+    else:
+        player4.life = False
+
+    if player_1 is SELECT.PLAYER:
+        player1 = Player()
+        player1.load_animations(scale)
+        blocks.append(player1)
+    else:
+        player1.life = False
     
 
     
@@ -147,38 +144,37 @@ def initGame(path,player_ia,ennemi1_ia,ennemi2_ia,ennemi3_ia, scale):
 
 def main():
     createmap()
-    while player.life:
-        
+    while player1.life:
         timer = clock.tick(15)
         for bot in other_list:
             bot.make_move(map, bombs, explode, blocks)
         keys = pygame.key.get_pressed()
-        temp = player.head
+        temp = player1.head
         movement = False
         if keys[pygame.K_DOWN]:
             temp = 0
-            player.move(0, 1, map, blocks)
+            player1.move(0, 1, map, blocks)
             movement = True
         elif keys[pygame.K_RIGHT]:
             temp = 1
-            player.move(1, 0, map, blocks)
+            player1.move(1, 0, map, blocks)
             movement = True
         elif keys[pygame.K_UP]:
             temp = 2
-            player.move(0, -1, map, blocks)
+            player1.move(0, -1, map, blocks)
             movement = True
         elif keys[pygame.K_LEFT]:
             temp = 3
-            player.move(-1, 0, map, blocks)
+            player1.move(-1, 0, map, blocks)
             movement = True
-        if temp != player.head:
-            player.frame = 0
-            player.head = temp
+        if temp != player1.head:
+            player1.frame = 0
+            player1.head = temp
         if movement:
-            if player.frame == 2:
-                player.frame = 0
+            if player1.frame == 2:
+                player1.frame = 0
             else:
-                player.frame += 1
+                player1.frame += 1
 
         DrawAll()
         for e in pygame.event.get():
@@ -186,12 +182,12 @@ def main():
                 sys.exit(0)
             elif e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_SPACE:
-                    if player.bomb_limit == 0:
+                    if player1.bomb_limit == 0:
                         continue
-                    temp_bomb = player.plantbomb(map)
+                    temp_bomb = player1.plantbomb(map)
                     bombs.append(temp_bomb)
                     map[temp_bomb.x][temp_bomb.y] = 3
-                    player.bomb_limit -= 1
+                    player1.bomb_limit -= 1
 
         update_bombs(timer)
     endgame()
@@ -206,6 +202,7 @@ def createmap():
                 continue
             if random.randint(0, 9) < 7:
                 map[i][j] = 2
+
     return
 
 
@@ -221,9 +218,9 @@ def DrawAll():
     for y in explode:
         for x in y.sectors:
             screen.blit(explosion_images[y.frame], (x[0] * width, x[1] * height, height, width))
-    if player.life:
-        screen.blit(player.animation[player.head][player.frame],
-               (player.x * (width / 4), player.y * (height / 4), width, height))
+    if player1.life:
+        screen.blit(player1.animation[player1.head][player1.frame],
+               (player1.x * (width / 4), player1.y * (height / 4), width, height))
     for bot in other_list:
         if bot.life:
             screen.blit(bot.animation[bot.head][bot.frame],
@@ -250,7 +247,7 @@ def update_bombs(timer):
             exp.clear_sectors(map)
             explode.append(exp)
     if player not in other_list:
-        player.dead(explode)
+        player1.dead(explode)
     for bot in other_list:
         bot.dead(explode)
     for e in explode:
